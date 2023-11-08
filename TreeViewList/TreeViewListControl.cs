@@ -1013,7 +1013,7 @@ namespace TreeViewList
             if (e.Handled)
                 return;
 
-            graphics.DrawString(Text, column.HeaderFont ?? Font, column.HeaderTextBrush ?? SystemBrushes.ControlText, layout, format);
+            graphics.DrawString(column.Text, column.HeaderFont ?? Font, column.HeaderTextBrush ?? SystemBrushes.ControlText, layout, format);
             OnDrawnColumnHeader(this, new DrawColumnEventArgs(graphics, column, layout, format));
         }
 

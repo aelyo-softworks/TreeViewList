@@ -38,6 +38,8 @@ namespace ShellExplorer.Shell
         public DateTime? DateModified => GetProperty<DateTime?>(PROPERTYKEY.System.DateModified);
         public DateTime? DateAccessed => GetProperty<DateTime?>(PROPERTYKEY.System.DateAccessed);
         public DateTime? DateCreated => GetProperty<DateTime?>(PROPERTYKEY.System.DateCreated);
+        public string? ItemType => GetProperty<string>(PROPERTYKEY.System.ItemType);
+        public string? ItemTypeText => GetProperty<string>(PROPERTYKEY.System.ItemTypeText);
 
         public object? GetProperty(PROPERTYKEY pk, bool throwOnError = false)
         {
@@ -57,7 +59,7 @@ namespace ShellExplorer.Shell
             if (value is T t)
                 return t;
 
-            return defaultValue;
+            return Conversions.ChangeType(value, defaultValue);
         }
 
         public override string ToString() => SIGDN_NORMALDISPLAY;

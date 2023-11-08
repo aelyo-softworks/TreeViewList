@@ -25,6 +25,8 @@ namespace ShellExplorer.Interop
 
         public static class System
         {
+            public static PROPERTYKEY ItemType => new(new Guid("28636aa6-953d-11d2-b5d6-00c04fd918d0"), 11);
+            public static PROPERTYKEY ItemTypeText => new(new Guid("b725f130-47ef-101a-a5f1-02608c9eebac"), 4);
             public static PROPERTYKEY Size => new(new Guid("b725f130-47ef-101a-a5f1-02608c9eebac"), 12);
             public static PROPERTYKEY FileAttributes => new(new Guid("b725f130-47ef-101a-a5f1-02608c9eebac"), 13);
             public static PROPERTYKEY DateModified => new(new Guid("b725f130-47ef-101a-a5f1-02608c9eebac"), 14);

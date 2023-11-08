@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using ShellExplorer.Interop;
 using ShellExplorer.Utilities;
@@ -10,10 +11,44 @@ namespace ShellExplorer.Shell
     {
         private static readonly Lazy<Folder> _desktop = new(() => GetKnownFolder(KNOWNFOLDERID.FOLDERID_Desktop)!);
         public static Folder Desktop => _desktop.Value;
+        public static Guid ShellFSFolder { get; } = new("f3364ba0-65b9-11ce-a9ba-00aa004ae837");
 
         public Folder(object? shellItem)
             : base(shellItem)
         {
+        }
+
+        public Guid ClassId
+        {
+            get
+            {
+                _shellItem.BindToHandler(null, BHID.BHID_SFObject, typeof(IPersist).GUID, out var obj);
+                var clsid = Guid.Empty;
+                if (obj is IPersist persist)
+                {
+                    persist.GetClassID(out clsid);
+                }
+                return clsid;
+            }
+        }
+
+        public bool HasAnyChildren
+        {
+            get
+            {
+                var path = SIGDN_FILESYSPATH;
+                if (!string.IsNullOrEmpty(path))
+                {
+                    // if the item is a file (.zip, etc.), don't open it
+                    if (Win32FindData.PathIsFile(path))
+                        return true;
+
+                    if (Win32FindData.PathIsDirectory(path))
+                        return Win32FindData.EnumerateFileSystemEntries(path).Any();
+                }
+
+                return true; // don't scan unknown things
+            }
         }
 
         public IEnumerable<Item> Children => EnumerateChildren();
