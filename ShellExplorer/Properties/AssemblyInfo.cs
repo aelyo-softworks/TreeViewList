@@ -11,7 +11,7 @@ using System.Runtime.Versioning;
 #endif
 [assembly: AssemblyCompany("Aelyo Softworks")]
 [assembly: AssemblyProduct("Aelyo ShellExplorer")]
-[assembly: AssemblyCopyright("Copyright (C) 2022-2023 Aelyo Softworks. All rights reserved.")]
+[assembly: AssemblyCopyright("Copyright (C) 2022-2024 Aelyo Softworks. All rights reserved.")]
 [assembly: ComVisible(false)]
 [assembly: Guid("8399376b-0340-4ff6-a253-665814c522a2")]
 [assembly: SupportedOSPlatform("windows")]

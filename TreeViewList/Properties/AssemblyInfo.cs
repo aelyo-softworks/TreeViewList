@@ -11,7 +11,7 @@ using System.Runtime.Versioning;
 #endif
 [assembly: AssemblyCompany("Aelyo Softworks")]
 [assembly: AssemblyProduct("Aelyo TreeViewList")]
-[assembly: AssemblyCopyright("Copyright (C) 2022-2023 Aelyo Softworks. All rights reserved.")]
+[assembly: AssemblyCopyright("Copyright (C) 2022-2024 Aelyo Softworks. All rights reserved.")]
 [assembly: ComVisible(false)]
 [assembly: Guid("db75ae16-ba2b-4c11-84a5-f46a2e79a5c3")]
 [assembly: SupportedOSPlatform("windows")]
