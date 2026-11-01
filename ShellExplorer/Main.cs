@@ -1,10 +1,9 @@
+using ShellN.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using ShellExplorer.Shell;
-using ShellExplorer.Utilities;
 using TreeViewList;
 
 namespace ShellExplorer
@@ -23,6 +22,7 @@ namespace ShellExplorer
             _tvl.Columns.Add("Name");
             _tvl.Columns.Add("Date modified");
             _tvl.Columns.Add("Type");
+
             var sizeColumn = _tvl.Columns.Add("Size");
             sizeColumn.HorizontalAlignment = StringAlignment.Far;
             _tvl.RowExpanded += OnRowExpanded;
@@ -31,7 +31,7 @@ namespace ShellExplorer
         protected override void OnHandleCreated(EventArgs e)
         {
             base.OnHandleCreated(e);
-            var desktop = Folder.Desktop;
+            var desktop = ShellFolder.Desktop;
             LoadFolder(_tvl, desktop);
         }
 
@@ -57,9 +57,10 @@ namespace ShellExplorer
             }
         }
 
-        private int DrawRowIcon(Item item, DrawCellEventArgs e)
+        private int DrawRowIcon(ShellItem item, DrawCellEventArgs e)
         {
-            using var icon = item.GetIconFromImageList(Interop.SHIL.SHIL_SMALL);
+            var handle = item.GetIconHandle(ShellN.SHIL.SHIL_SMALL);
+            using var icon = Icon.FromHandle(handle);
             if (icon == null)
                 return 0;
 
@@ -69,23 +70,14 @@ namespace ShellExplorer
             return icon.Width;
         }
 
-        private static IEnumerable<Item> EnumerateChildren(Folder folder)
+        private void LoadFolder(IRowContainer container, ShellFolder folder)
         {
-            if (folder.ClassId == Folder.ShellFSFolder)
+            foreach (var item in folder.EnumerateChildren().Order(ItemComparer.Instance))
             {
-                var path = folder.SIGDN_FILESYSPATH;
-                if (Win32FindData.PathIsDirectory(path))
-                    return folder.Children.OrderBy(c => c, ItemComparer.Instance);
-            }
-
-            return folder.Children;
-        }
-
-        private void LoadFolder(IRowContainer container, Folder folder)
-        {
-            foreach (var item in EnumerateChildren(folder))
-            {
-                AddRow(container, item);
+                if (item != null)
+                {
+                    AddRow(container, item);
+                }
             }
         }
 
@@ -93,7 +85,7 @@ namespace ShellExplorer
         {
             if (e.Row.Tag is Model model)
             {
-                if (!model.Loaded && model.Item is Folder folder)
+                if (!model.Loaded && model.Item is ShellFolder folder)
                 {
                     model.Loaded = true;
                     LoadFolder(e.Row, folder);
@@ -101,18 +93,18 @@ namespace ShellExplorer
             }
         }
 
-        private void AddRow(IRowContainer container, Item item)
+        private void AddRow(IRowContainer container, ShellItem item)
         {
             var row = container.Rows.Add();
             row.Tag = new Model(item);
             row.Cells.Add(item.SIGDN_NORMALDISPLAY);
             row.Cells.Add(item.DateModified);
-            row.Cells.Add(item.ItemTypeText);
+            row.Cells.Add(item.Type);
             row.Cells.Add(item.Size);
 
-            if (item is Folder folder)
+            if (item is ShellFolder folder)
             {
-                if (folder.HasAnyChildren)
+                if (HasAnyChildren(folder))
                 {
                     row.IsExpandable = true;
                 }
@@ -120,22 +112,32 @@ namespace ShellExplorer
             _tvl.Invalidate();
         }
 
-        private sealed class Model
+        private static bool HasAnyChildren(ShellFolder folder)
         {
-            public Model(Item item)
+            foreach (var item in folder.EnumerateChildren())
             {
-                Item = item;
+                if (item != null)
+                {
+                    item.Dispose();
+                    return true;
+                }
             }
-
-            public bool Loaded;
-            public Item Item { get; }
+            return false;
         }
 
-        private sealed class ItemComparer : IComparer<Item>
+        private sealed class Model(ShellItem item) : IDisposable
         {
-            public static ItemComparer Instance = new();
+            public bool Loaded;
+            public ShellItem Item { get; } = item;
 
-            public int Compare(Item? x, Item? y)
+            public void Dispose() => Item.Dispose();
+        }
+
+        private sealed class ItemComparer : IComparer<ShellItem>
+        {
+            public static ItemComparer Instance { get; } = new();
+
+            public int Compare(ShellItem? x, ShellItem? y)
             {
                 ArgumentNullException.ThrowIfNull(x);
                 ArgumentNullException.ThrowIfNull(y);
@@ -148,7 +150,7 @@ namespace ShellExplorer
                 else if (y.IsFolder)
                     return 1;
 
-                return x.SIGDN_NORMALDISPLAY.CompareTo(y.SIGDN_NORMALDISPLAY);
+                return x.SIGDN_NORMALDISPLAY?.CompareTo(y.SIGDN_NORMALDISPLAY) ?? 0;
             }
         }
     }

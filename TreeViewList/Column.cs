@@ -44,8 +44,7 @@ namespace TreeViewList
                 if (_width == value)
                     return;
 
-                if (value < 0)
-                    throw new ArgumentOutOfRangeException(nameof(value));
+                ArgumentOutOfRangeException.ThrowIfNegative(value);
 
                 _width = Math.Max(MinWidth, value);
             }
@@ -59,8 +58,7 @@ namespace TreeViewList
                 if (_minWidth == value)
                     return;
 
-                if (value < 0)
-                    throw new ArgumentOutOfRangeException(nameof(value));
+                ArgumentOutOfRangeException.ThrowIfNegative(value);
 
                 _minWidth = value;
             }
@@ -74,8 +72,7 @@ namespace TreeViewList
                 if (_verticalPadding == value)
                     return;
 
-                if (value < 0)
-                    throw new ArgumentOutOfRangeException(nameof(value));
+                ArgumentOutOfRangeException.ThrowIfNegative(value);
 
                 _verticalPadding = value;
             }
@@ -89,8 +86,7 @@ namespace TreeViewList
                 if (_horizontalPadding == value)
                     return;
 
-                if (value < 0)
-                    throw new ArgumentOutOfRangeException(nameof(value));
+                ArgumentOutOfRangeException.ThrowIfNegative(value);
 
                 _horizontalPadding = value;
             }

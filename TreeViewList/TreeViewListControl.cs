@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
@@ -29,9 +30,9 @@ namespace TreeViewList
         public event EventHandler<DrawRowEventArgs>? DrawnRow;
         public event EventHandler<EventArgs>? SelectionChanged;
 
-        private readonly Dictionary<long, int> _rowsIndex = new();
-        private readonly List<CachedRow> _cachedRows = new();
-        private readonly List<Row> _selectedRows = new();
+        private readonly Dictionary<long, int> _rowsIndex = [];
+        private readonly List<CachedRow> _cachedRows = [];
+        private readonly List<Row> _selectedRows = [];
         private Brush? _backColorBrush;
         private Brush? _rowSelectedBrush;
         private SelectionMode _selectionMode;
@@ -94,6 +95,8 @@ namespace TreeViewList
         public ColumnCollection Columns { get; }
 
         private bool IsSelectionMultiple => SelectionMode == SelectionMode.MultiSimple || SelectionMode == SelectionMode.MultiExtended;
+
+        [DefaultValue(SelectionMode.None)]
         public virtual SelectionMode SelectionMode
         {
             get => _selectionMode;
@@ -125,6 +128,7 @@ namespace TreeViewList
         }
 
         // includes header
+        [DefaultValue(0)]
         public int ExtentHeight
         {
             get => _extentHeight;
@@ -139,6 +143,7 @@ namespace TreeViewList
             }
         }
 
+        [DefaultValue(0)]
         public int ExtentWidth
         {
             get => _extentWidth;
@@ -153,6 +158,7 @@ namespace TreeViewList
             }
         }
 
+        [DefaultValue(true)]
         public virtual bool DrawColumnsHeader
         {
             get => _drawColumnsHeader;
@@ -165,6 +171,7 @@ namespace TreeViewList
             }
         }
 
+        [DefaultValue(true)]
         public virtual bool DrawLastColumnRightLine
         {
             get => _drawLastColumnRightLine;
@@ -177,6 +184,7 @@ namespace TreeViewList
             }
         }
 
+        [DefaultValue(true)]
         public virtual bool DrawLastRowBottomLine
         {
             get => _drawLastRowBottomLine;
@@ -189,6 +197,7 @@ namespace TreeViewList
             }
         }
 
+        [DefaultValue(0)]
         public virtual int VerticalOffset
         {
             get => VerticalScrollBar.Value;
@@ -202,6 +211,7 @@ namespace TreeViewList
             }
         }
 
+        [DefaultValue(0)]
         public virtual int HorizontalOffset
         {
             get => HorizontalScrollBar.Value;
@@ -216,6 +226,7 @@ namespace TreeViewList
         }
 
         private int RowHeightWithLine => RowHeight + LineWidth;
+        [DefaultValue(20)]
         public virtual int RowHeight
         {
             get => _rowHeight;
@@ -224,14 +235,14 @@ namespace TreeViewList
                 if (_rowHeight == value)
                     return;
 
-                if (value <= 0)
-                    throw new ArgumentOutOfRangeException(nameof(value));
+                ArgumentOutOfRangeException.ThrowIfNegativeOrZero(value);
 
                 _rowHeight = value;
             }
         }
 
         private int HeaderHeightWithLine => DrawColumnsHeader ? HeaderHeight + LineWidth : 0;
+        [DefaultValue(0)]
         public virtual int HeaderHeight
         {
             get => _headerHeight;
@@ -240,13 +251,13 @@ namespace TreeViewList
                 if (_headerHeight == value)
                     return;
 
-                if (value < 0)
-                    throw new ArgumentOutOfRangeException(nameof(value));
+                ArgumentOutOfRangeException.ThrowIfNegative(value);
 
                 _headerHeight = value;
             }
         }
 
+        [DefaultValue(0)]
         public virtual int RowOverhang
         {
             get => _rowOverhang;
@@ -255,13 +266,13 @@ namespace TreeViewList
                 if (_rowOverhang == value)
                     return;
 
-                if (value < 0)
-                    throw new ArgumentOutOfRangeException(nameof(value));
+                ArgumentOutOfRangeException.ThrowIfNegative(value);
 
                 _rowOverhang = value;
             }
         }
 
+        [DefaultValue(200)]
         public virtual int DefaultColumnWidth
         {
             get => _defaultColumnWidth;
@@ -270,13 +281,13 @@ namespace TreeViewList
                 if (_defaultColumnWidth == value)
                     return;
 
-                if (value < 0)
-                    throw new ArgumentOutOfRangeException(nameof(value));
+                ArgumentOutOfRangeException.ThrowIfNegative(value);
 
                 _defaultColumnWidth = value;
             }
         }
 
+        [DefaultValue(40)]
         public virtual int DefaultMinColumnWidth
         {
             get => _defaultMinColumnWidth;
@@ -285,13 +296,13 @@ namespace TreeViewList
                 if (_defaultMinColumnWidth == value)
                     return;
 
-                if (value < 0)
-                    throw new ArgumentOutOfRangeException(nameof(value));
+                ArgumentOutOfRangeException.ThrowIfNegative(value);
 
                 _defaultMinColumnWidth = value;
             }
         }
 
+        [DefaultValue(typeof(Color), "Control")]
         public virtual Color LineColor
         {
             get => _linePen?.Color ?? DefaultLineColor;
@@ -307,6 +318,7 @@ namespace TreeViewList
             }
         }
 
+        [DefaultValue(1)]
         public virtual int LineWidth
         {
             get => (int)(_linePen?.Width ?? DefaultLineWidth);
@@ -325,6 +337,7 @@ namespace TreeViewList
             }
         }
 
+        [DefaultValue(null)]
         public virtual Brush? RowSelectedBrush
         {
             get => _rowSelectedBrush;
@@ -397,7 +410,7 @@ namespace TreeViewList
         public virtual Rectangle GetRowBounds(Row row) => GetRowBounds(row, out _);
         private Rectangle GetRowBounds(Row row, out int index)
         {
-            ArgumentNullException.ThrowIfNull(nameof(row));
+            ArgumentNullException.ThrowIfNull(row);
             if (row.Control != this)
                 throw new ArgumentException(null, nameof(row));
 
@@ -597,10 +610,7 @@ namespace TreeViewList
                     break;
 
                 case Keys.Space:
-                    if (_focusedRow != null)
-                    {
-                        _focusedRow.IsSelected = !_focusedRow.IsSelected;
-                    }
+                    _focusedRow?.IsSelected = !_focusedRow.IsSelected;
                     break;
             }
         }
@@ -1075,7 +1085,7 @@ namespace TreeViewList
             {
                 var delta = point.X - width;
                 if (Math.Abs(delta) <= MouseTolerance)
-                    return Columns[Columns.Count - 1];
+                    return Columns[^1];
             }
             return null;
         }
@@ -1319,7 +1329,9 @@ namespace TreeViewList
             VerticalOffset = offset;
         }
 
+#pragma warning disable IDE0060 // Remove unused parameter
         private void InvalidateExpander(Row row)
+#pragma warning restore IDE0060 // Remove unused parameter
         {
             Invalidate(); // TODO: optimize
         }
@@ -1344,18 +1356,11 @@ namespace TreeViewList
             public override string ToString() => new string('-', Level) + " " + Row.ToString();
         }
 
-        private sealed class MovingColumnHeader
+        private sealed class MovingColumnHeader(Column column, Point position)
         {
-            public MovingColumnHeader(Column column, Point position)
-            {
-                Column = column;
-                Position = position;
-                Width = column.Width;
-            }
-
-            public int Width;
-            public Column Column;
-            public Point Position;
+            public int Width = column.Width;
+            public Column Column = column;
+            public Point Position = position;
 
             public void MouseMove(Point position)
             {

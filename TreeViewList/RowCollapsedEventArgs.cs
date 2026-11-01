@@ -1,10 +1,6 @@
 ﻿namespace TreeViewList
 {
-    public class RowCollapsedEventArgs : RowEventArgs
+    public class RowCollapsedEventArgs(Row row) : RowEventArgs(row)
     {
-        public RowCollapsedEventArgs(Row row)
-            : base(row)
-        {
-        }
     }
 }

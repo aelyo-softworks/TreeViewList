@@ -1,13 +1,8 @@
 ﻿namespace TreeViewList
 {
-    public class Cell
+    public class Cell(object? value)
     {
-        public Cell(object? value)
-        {
-            Value = value;
-        }
-
-        public virtual object? Value { get; set; }
+        public virtual object? Value { get; set; } = value;
         public string ValueAsString => Value?.ToString() ?? string.Empty;
 
         public override string ToString() => ValueAsString;

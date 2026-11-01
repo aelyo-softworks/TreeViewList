@@ -5,7 +5,7 @@ namespace TreeViewList
 {
     public abstract class BaseList<T> : IEnumerable<T>
     {
-        private readonly List<T> _list = new();
+        private readonly List<T> _list = [];
 
         protected BaseList() { }
 
